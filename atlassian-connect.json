@@ -1,0 +1,25 @@
+{
+    "name": "JIRA Client",
+    "description": "JIRA Client add-on",
+    "key": "com.jaxara.jira_client",
+    "baseUrl": "https://miniman.us/office/jira_client",
+    "vendor": {
+        "name": "Jaxara",
+        "url": "http://jaxara.com"
+    },
+    "authentication": {
+        "type": "none"
+    },
+    "version": "1.0",
+    "modules": {
+        "generalPages": [
+            {
+                "url": "/index.html",
+                "key": "main",
+                "name": {
+                    "value": "Jira Client"
+                }
+            }
+        ]
+    }
+}

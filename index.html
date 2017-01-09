@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" data-ng-app="app">
+<head>
+    <meta charset="UTF-8">
+    <title>Jira Client</title>
+
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/css/demo.css">
+
+    <script type="text/javascript" src="assets/libs/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="assets/libs/angular.min.js"></script>
+    <script type="text/javascript" src="assets/libs/ui-bootstrap-tpls-1.2.5.min.js"></script>
+    <script type="text/javascript" src="app/app.js"></script>
+    <script type="text/javascript" src="app/issues.controller.js"></script>
+    <script type="text/javascript" src="app/issues.factory.js"></script>
+</head>
+<body data-ng-controller="IssuesController">
+
+    <div class="container">
+
+        <div class="well">
+
+            <h1 class="text-center"><a href="https://pantheon.atlassian.net/secure/RapidBoard.jspa?rapidView=98&view=planning.nodetail">Test Project One (TPO)</a> - Client Access</h1>
+            <p class="lead text-center">Backlog of TPO. Only <strong><i>Priority</i></strong> can be changed for these issues. Changes will immediately get reflected at JIRA.</p>
+        </div>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Issue ID</th>
+                    <th>Summary</th>
+                    <th>Status</th>
+                    <th style="width: 180px">Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="issue in issues">
+                    <td>
+                        <a ng-href="{{baseUrl + issue.key}}" target="_blank">{{issue.key}}</a>
+                    </td>
+                    <td>{{issue.fields.summary}}</td>
+                    <td>{{issue.fields.status.name}}</td>
+                    <td>
+                        <img ng-src="{{issue.fields.priority.iconUrl}}" class="icon"/>
+                        {{issue.fields.priority.name}}
+                        <div class="btn-group pull-right" uib-dropdown>
+                            <button type="button" class="btn btn-primary btn-xs" uib-dropdown-toggle>
+                                <span class="caret"></span>
+                            </button>
+                            <ul uib-dropdown-menu role="menu" aria-labelledby="split-button">
+                                <li role="menuitem" ng-repeat="priority in priorities">
+                                    <a href="javascript:;" ng-click="changePriority(issue, priority)">{{priority.name}}</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br><br><br><br><br><br><br><br>
+    </div>
+
+</body>
+</html>
