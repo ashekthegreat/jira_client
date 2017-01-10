@@ -12,24 +12,25 @@ $message = json_encode( $postdata );
 $headers = "From: mail.ashek@gmail.com";
 
 //mail($to, $subject, $message, $headers);
-
 ///////////////////////////
 // Now create the task
 
-$username = 'aelahi';
-$password = 'aelahi@2011';
+//$username = 'aelahi';
+//$password = 'aelahi@2011';
+$username = 'api_user';
+$password = '@piU$er#69';
 
 $url = "https://pantheon.atlassian.net/rest/api/2/issue";
 
 $data = array(
     'fields' => array(
         'project' => array(
-            'key' => 'TPT'
+            'key' => $_GET['target']
         ),
         'summary' => $postdata->issue->fields->summary,
         'description' => $postdata->issue->fields->description,
         'issuetype' => array(
-            'name' => $postdata->issue->fields->issuetype->name
+            'name' => 'Task'
         )
     )
 );
