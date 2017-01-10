@@ -1,5 +1,5 @@
 <?php
-$postdata = file_get_contents("php://input");
+$postdata = json_decode(file_get_contents("php://input"));
 
 /**
  * This section actually sends the email.
@@ -33,7 +33,7 @@ $data = array(
         )
     )
 );
-
+mail($to, $subject, json_encode( $data ), $headers);
 $ch = curl_init();
 
 $headers = array(
