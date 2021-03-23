@@ -1,0 +1,23 @@
+{
+    "projectMap": {
+        "XXXX":"YYYYY",
+        "TSD":"TPT"
+    },
+    "clientMap": {
+        "aelahi": {
+            "component": "ABCD",
+            "sdAssignee": "jilani",
+            "maintAssignee": "tnasrin"
+        },
+        "jilani": {
+            "component": "PQRS",
+            "sdAssignee": "tnasrin",
+            "maintAssignee": "aelahi"
+        },
+        "tnasrin": {
+            "component": "WXYZ",
+            "sdAssignee": "jilani",
+            "maintAssignee": "aelahi"
+        }
+    }
+}

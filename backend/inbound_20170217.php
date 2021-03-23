@@ -1,9 +1,9 @@
 <?php
-echo "webhook received";
 // map of the cloner projects. Add new items if necessary
-$config = json_decode( file_get_contents( __DIR__ . "/config.json"), true );
-$map = $config['projectMap'];
-$clientMap = $config['clientMap'];
+$map = array(
+    "XXXX" => "YYYYY",
+    "TSD" => "TPT"
+);
 $username = 'api_user';
 $password = '@piU$er#69';
 $credentials = "$username:$password";
@@ -18,53 +18,24 @@ $postData = json_decode(file_get_contents("php://input"));
 $issue = $_GET['issue'];
 $project = $_GET['project'];
 
-echo "echoing vars\n";
-echo json_encode( $project . "\n" );
-echo json_encode( $map . "\n" );
-echo "echoing vars done\n";
+
 if (isset($map[$project])) {
     $target = $map[$project];
 } else {
     exit(0);
 }
 
-sendMail("Service desk hook received", $postData);
+//sendMail("Service desk hook received", $postData);
 //sendMail("Params: ", array("target" => $target, "issue" => $issue, "project" => $project));
 
 function sendMail($subject, $data)
 {
-    $to = "panthbabel1@gmail.com";
+    $to = "mail.ashek@gmail.com";
     $message = json_encode($data);
-    $headers = "From: panthbabel1@gmail.com";
+    $headers = "From: mail.ashek@gmail.com";
 
     //mail($to, $subject, $message, $headers);
     return mail($to, $subject, $message, $headers);
-}
-
-function curlPut($url, $headers, $credentials, $data)
-{
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_VERBOSE, 1);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_USERPWD, $credentials);
-
-    $result = curl_exec($ch);
-    $ch_error = curl_error($ch);
-    curl_close($ch);
-
-    if ($ch_error) {
-        echo "cURL Error: $ch_error";
-    } else {
-        echo "Result: " . $result;
-    }
-    return json_decode($result);
 }
 
 function curlPost($url, $headers, $credentials, $data)
@@ -200,7 +171,7 @@ function transferAttachment($targetIssueKey, $remoteFile, $localFile, $headers, 
     return json_decode($result);
 }
 
-function createIssue($postData, $target, $headers, $credentials, $clientMap)
+function createIssue($postData, $target, $headers, $credentials)
 {
     $url = "https://pantheon.atlassian.net/rest/api/2/issue";
 
@@ -213,63 +184,10 @@ function createIssue($postData, $target, $headers, $credentials, $clientMap)
             'description' => (!is_null($postData->issue->fields->description) ? $postData->issue->fields->description : ""),
             'issuetype' => array(
                 'name' => 'Task'
-            ),
-            'assignee' => array(
-                'name' => ''
-            ),
-            'components'=> array(
-                array(
-                    'name'=> ""
-                )
             )
         )
     );
-    // check for clientMap
-    foreach ($clientMap as $key => $value) {
-        echo $postData->user->key . " <> " . $key . "*****";
-        if($postData->user->key == $key){
-            // we found a map lets set the component and assignee
-            $data['fields']['assignee']['name'] = $value['maintAssignee'];
-            $data['fields']['components'][0]['name'] = $value['component'];
-            //array_push($data[fields], array('components' => array('name' => $value->component)) );
-            //array_push($data[fields], array('assignee' => array('key' => $value->maintAssignee)) );
-        }
-    }
-    echo json_encode($data);
-    sendMail("Creating task", json_encode($data));
     return curlPost($url, $headers, $credentials, $data);
-}
-
-function updateIssue($postData, $target, $headers, $credentials, $clientMap)
-{
-    $url = "https://pantheon.atlassian.net/rest/api/2/issue/" . $postData->issue->key . "?notifyUsers=false";
-
-    $data = array(
-        'fields' => array(
-            'assignee' => array(
-                'name' => ''
-            ),
-            'components'=> array(
-                array(
-                    'name'=> ""
-                )
-            )
-        )
-    );
-    // check for clientMap
-    foreach ($clientMap as $key => $value) {
-        echo $postData->user->key . " <> " . $key . "*****";
-        if($postData->user->key == $key){
-            // we found a map lets set the component and assignee
-            $data['fields']['assignee']['name'] = $value['sdAssignee'];
-            $data['fields']['components'][0]['name'] = $value['component'];
-            //array_push($data[fields], array('components' => array('name' => $value->component)) );
-            //array_push($data[fields], array('assignee' => array('key' => $value->maintAssignee)) );
-        }
-    }
-    echo "Updating issue: " . json_encode($data);
-    sendMail("Updating task", json_encode($data));
-    return curlPut($url, $headers, $credentials, $data);
 }
 
 function createComment($postData, $targetIssueKey, $headers, $credentials)
@@ -283,13 +201,13 @@ function createComment($postData, $targetIssueKey, $headers, $credentials)
     return curlPost($url, $headers, $credentials, $data);
 }
 
-function cloneIssue($postData, $target, $headers, $credentials, $clientMap)
+function cloneIssue($postData, $target, $headers, $credentials)
 {
-    $createdIssue = createIssue($postData, $target, $headers, $credentials, $clientMap);
+    $createdIssue = createIssue($postData, $target, $headers, $credentials);
 
     if (isset($createdIssue) && isset($createdIssue->key)) {
 
-        createIssueLink("SDClone", $createdIssue->key, $postData->issue->key, $headers, $credentials);
+        createIssueLink("Cloners", $createdIssue->key, $postData->issue->key, $headers, $credentials);
 
         if (!empty($postData->issue->fields->attachment)) {
 
@@ -301,11 +219,10 @@ function cloneIssue($postData, $target, $headers, $credentials, $clientMap)
                 echo $remoteFile . "\n" . $localFile;
 
                 transferAttachment($createdIssue->key, $remoteFile, $localFile, $headers, $credentials);
+                //createAttachment($createdIssue, $localFile, $credentials);
+                //unlink($localFile);
             }
         }
-
-        // update SD issue and set assignee and component
-        updateIssue($postData, $target, $headers, $credentials, $clientMap);
     }
     return $createdIssue;
 }
@@ -318,7 +235,7 @@ function cloneComment($postData, $issueKey, $headers, $credentials)
 
     $targetIssueKey = null;
     for ($i = 0; $i < count($sourceIssue->fields->issuelinks); $i++) {
-        if ($sourceIssue->fields->issuelinks[$i]->type->name == "SDClone") {
+        if ($sourceIssue->fields->issuelinks[$i]->type->name == "Cloners") {
             $targetIssueKey = $sourceIssue->fields->issuelinks[$i]->inwardIssue->key;
             break;
         }
@@ -354,6 +271,8 @@ function cloneComment($postData, $issueKey, $headers, $credentials)
             }
             if (!$isFound) {
                 transferAttachment($targetIssueKey, $remoteFile, $localFile, $headers, $credentials);
+                //createAttachment($createdIssue, $localFile, $credentials);
+                //unlink($localFile);
             }
 
         }
@@ -366,7 +285,7 @@ function cloneComment($postData, $issueKey, $headers, $credentials)
 }
 
 if ($postData->webhookEvent == "jira:issue_created") {
-    cloneIssue($postData, $target, $headers, $credentials, $clientMap);
+    cloneIssue($postData, $target, $headers, $credentials);
 } elseif ($postData->webhookEvent == "comment_created") {
     cloneComment($postData, $issue, $headers, $credentials);
 }
